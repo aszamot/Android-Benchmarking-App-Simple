@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DeviceInfoCellView">
+        <attr name="attributeName" format="string" />
+        <attr name="attributeValue" format="string" />
+    </declare-styleable>
+</resources>

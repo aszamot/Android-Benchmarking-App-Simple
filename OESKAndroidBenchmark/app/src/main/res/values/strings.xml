@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Android CPU Benchmark</string>
+
+    <!-- TABS -->
+    <string name="tab_dev_info">Device info</string>
+    <string name="tab_list_of_devices">List of devices</string>
+
+    <!-- BENCHMARK FRAGMENT -->
+    <string name="score_unknown">\?\?\?</string>
+    <string name="score_label">benchmark score</string>
+    <string name="make_test">make test</string>
+    <string name="about_device">About device</string>
+
+    <string name="device_info_model_label">Model</string>
+    <string name="device_info_model_id_label">Model ID</string>
+    <string name="device_info_os_label">OS</string>
+    <string name="device_info_build_label">Build</string>
+    <string name="device_info_cpu_label">CPU</string>
+    <string name="device_info_cpu_cores_label">Cores</string>
+    <string name="device_info_memory_label">Memory</string>
+    <string name="device_info_motherboard_label">Motherboard</string>
+
+    <!-- DEVICE FRAGMENT -->
+    <string name="search">Search for device</string>
+
+    <!-- TEST SENTENCE -->
+    <string name="test_sentence">Once upon a time</string>
+</resources>
