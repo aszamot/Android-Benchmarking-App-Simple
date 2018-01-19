@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,7 +24,6 @@ import pl.atk.oeskandroidbenchmark.utils.DeviceInfo;
  * Created by Tomasz on 13.12.2017.
  */
 
-//todo after score click display popup with details
 public class BenchmarkFragment extends Fragment implements BenchmarkContract.View {
 
     private BenchmarkContract.Presenter presenter = new BenchmarkPresenter(this);
@@ -43,17 +44,20 @@ public class BenchmarkFragment extends Fragment implements BenchmarkContract.Vie
     DeviceInfoCellView memoryInfo;
     @BindView(R.id.motherboard_info)
     DeviceInfoCellView motherboardInfo;
+    @BindView(R.id.progress)
+    ProgressBar progressBar;
+    @BindView(R.id.test_button)
+    Button testButton;
 
     @OnClick(R.id.test_button)
     public void makeTest() {
-        //todo perform test on click put score (for now total time)
+        presenter.preformTest();
     }
 
     Unbinder unbinder;
 
     public static BenchmarkFragment newInstance() {
         BenchmarkFragment benchmarkFragment = new BenchmarkFragment();
-
         return benchmarkFragment;
     }
 
@@ -81,7 +85,26 @@ public class BenchmarkFragment extends Fragment implements BenchmarkContract.Vie
     }
 
     @Override
+    public void setScore(String result) {
+        score.setText(result);
+    }
+
+    @Override
     public String getTestWord() {
         return getString(R.string.test_sentence);
+    }
+
+    @Override
+    public void setProgressBarVisibility(boolean shouldBeVisible) {
+        if(shouldBeVisible)
+            progressBar.setVisibility(View.VISIBLE);
+        else
+            progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void setTestButtonEnable(boolean shouldBeEnable) {
+        testButton.setAlpha(shouldBeEnable ? 1 : 0.5f);
+        testButton.setEnabled(shouldBeEnable);
     }
 }

@@ -8,10 +8,12 @@ public interface BenchmarkContract {
 
     interface View{
         String getTestWord();
+        void setProgressBarVisibility(boolean shouldBeVisible);
+        void setScore(String result);
+        void setTestButtonEnable(boolean shouldBeEnable);
     }
 
     interface Presenter{
-        void performSHATest();
-        void performMD5Test();
+        void preformTest();
     }
 }

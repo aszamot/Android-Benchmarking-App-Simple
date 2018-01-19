@@ -10,6 +10,7 @@
     <string name="score_label">benchmark score</string>
     <string name="make_test">make test</string>
     <string name="about_device">About device</string>
+    <string name="click_for_details">Touch for details</string>
 
     <string name="device_info_model_label">Model</string>
     <string name="device_info_model_id_label">Model ID</string>
@@ -25,4 +26,7 @@
 
     <!-- TEST SENTENCE -->
     <string name="test_sentence">Once upon a time</string>
+
+    <!-- ITEM DEVICE -->
+    <string name="benchmark_store">benchmark store:</string>
 </resources>
