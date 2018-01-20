@@ -1,7 +1,11 @@
 package pl.atk.oeskandroidbenchmark.screens.benchmark;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.MainThread;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +21,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 import pl.atk.oeskandroidbenchmark.R;
+import pl.atk.oeskandroidbenchmark.screens.main.MainActivity;
 import pl.atk.oeskandroidbenchmark.ui.DeviceInfoCellView;
 import pl.atk.oeskandroidbenchmark.utils.DeviceInfo;
 
@@ -51,10 +56,12 @@ public class BenchmarkFragment extends Fragment implements BenchmarkContract.Vie
 
     @OnClick(R.id.test_button)
     public void makeTest() {
-        presenter.preformTest();
+        presenter.preformTest(modelInfo.getAttributeValue());
     }
 
     Unbinder unbinder;
+
+    SharedPreferences prefs;
 
     public static BenchmarkFragment newInstance() {
         BenchmarkFragment benchmarkFragment = new BenchmarkFragment();
@@ -75,6 +82,14 @@ public class BenchmarkFragment extends Fragment implements BenchmarkContract.Vie
         motherboardInfo.setAttributeValue(DeviceInfo.getDeviceMotherBoard());
         memoryInfo.setAttributeValue(DeviceInfo.getDeviceTotalRAM(getContext()));
 
+        if (getActivity() != null) {
+            prefs = getActivity().getSharedPreferences("BenchPrefs", Activity.MODE_PRIVATE);
+            String scoreString = prefs.getString("LastScore", "???");
+            setScore(scoreString);
+        }
+
+        presenter.onCreate();
+
         return view;
     }
 
@@ -90,13 +105,20 @@ public class BenchmarkFragment extends Fragment implements BenchmarkContract.Vie
     }
 
     @Override
+    public void saveToPrefs(String score) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("LastScore", score);
+        editor.commit();
+    }
+
+    @Override
     public String getTestWord() {
         return getString(R.string.test_sentence);
     }
 
     @Override
     public void setProgressBarVisibility(boolean shouldBeVisible) {
-        if(shouldBeVisible)
+        if (shouldBeVisible)
             progressBar.setVisibility(View.VISIBLE);
         else
             progressBar.setVisibility(View.INVISIBLE);
@@ -106,5 +128,24 @@ public class BenchmarkFragment extends Fragment implements BenchmarkContract.Vie
     public void setTestButtonEnable(boolean shouldBeEnable) {
         testButton.setAlpha(shouldBeEnable ? 1 : 0.5f);
         testButton.setEnabled(shouldBeEnable);
+    }
+
+    @Override
+    public void showNoConnectionSnackBar() {
+        showSnackBar("No Internet connection. Score can't be saved.");
+    }
+
+    @Override
+    public void showErrorSnackBar() {
+        showSnackBar("Error while saving score");
+    }
+
+    @Override
+    public boolean checkInternetConnection() {
+        return ((MainActivity) getActivity()).checkInternetConnection();
+    }
+
+    private void showSnackBar(String text) {
+        Snackbar.make(getView(), text, Snackbar.LENGTH_SHORT).show();
     }
 }

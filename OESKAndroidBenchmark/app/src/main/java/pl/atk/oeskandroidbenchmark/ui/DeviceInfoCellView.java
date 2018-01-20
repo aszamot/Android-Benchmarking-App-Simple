@@ -47,4 +47,8 @@ public class DeviceInfoCellView extends FrameLayout {
     public void setAttributeValue(String value) {
         attributeValue.setText(value);
     }
+
+    public String getAttributeValue(){
+        return attributeValue.getText().toString();
+    }
 }

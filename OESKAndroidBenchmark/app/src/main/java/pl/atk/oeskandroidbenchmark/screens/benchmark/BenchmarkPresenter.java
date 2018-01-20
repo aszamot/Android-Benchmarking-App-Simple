@@ -1,14 +1,22 @@
 package pl.atk.oeskandroidbenchmark.screens.benchmark;
 
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Log;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.EventListener;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
-import pl.atk.oeskandroidbenchmark.model.TestResult;
 
 /**
  * Created by Tomasz on 13.12.2017.
@@ -22,14 +30,20 @@ public class BenchmarkPresenter implements BenchmarkContract.Presenter {
     private final int HOW_MANY_TEST_REPEATS = 20000;
     private final int CODE_TO_BROKE = 9999999;
 
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     public BenchmarkPresenter(BenchmarkContract.View view) {
         this.view = view;
     }
 
     @Override
-    public void preformTest() {
+    public void onCreate() {
+    }
+
+    @Override
+    public void preformTest(String deviceName) {
         TestTask testTask = new TestTask();
-        testTask.execute();
+        testTask.execute(deviceName);
     }
 
     private void performSHATest() {
@@ -91,7 +105,7 @@ public class BenchmarkPresenter implements BenchmarkContract.Presenter {
         }
     }
 
-    class TestTask extends AsyncTask<Void, Void, TestResult> {
+    class TestTask extends AsyncTask<String, Void, Long> {
 
         @Override
         protected void onPreExecute() {
@@ -101,8 +115,8 @@ public class BenchmarkPresenter implements BenchmarkContract.Presenter {
         }
 
         @Override
-        protected TestResult doInBackground(Void... voids) {
-            TestResult testResult = new TestResult();
+        protected Long doInBackground(String... name) {
+            final String devicename = name[0];
 
             Long hashTimeStart = System.nanoTime();
             performSHATest();
@@ -116,21 +130,62 @@ public class BenchmarkPresenter implements BenchmarkContract.Presenter {
             performBruteForce();
             Long bruteForceTimeTotal = System.nanoTime() - bruteForceTimeStart;
 
-            Long fullTestResult = hashTimeTotal + md5TimeTotal + bruteForceTimeTotal;
+            final Long fullTestResult = hashTimeTotal + md5TimeTotal + bruteForceTimeTotal;
             Double tempResult = fullTestResult / 10000d;
-            Long shortTestResult = Math.round(tempResult);
+            final Long shortTestResult = Math.round(tempResult);
 
-            testResult.setFullTime(fullTestResult);
-            testResult.setShortTime(shortTestResult);
+            if (view.checkInternetConnection()) {
+                Map<String, Object> dataToSave = new HashMap<>();
+                dataToSave.put("deviceName", devicename);
 
-            return testResult;
+                final Map<String, Object> resultToSave = new HashMap<>();
+                resultToSave.put("scoreFullTime", fullTestResult);
+
+                db.collection("models").document(devicename)
+                        .set(dataToSave)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                db.collection("models/" + devicename + "/results")
+                                        .add(resultToSave)
+                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                            @Override
+                                            public void onSuccess(DocumentReference documentReference) {
+                                                view.saveToPrefs(String.valueOf(shortTestResult));
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                view.showErrorSnackBar();
+                                            }
+                                        });
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                view.showErrorSnackBar();
+                            }
+                        });
+            } else {
+                view.showNoConnectionSnackBar();
+            }
+
+            return shortTestResult;
         }
 
         @Override
-        protected void onPostExecute(TestResult testResult) {
-            view.setScore(testResult.getShortTime().toString());
+        protected void onPostExecute(Long shortResult) {
+            view.setScore(shortResult.toString());
             view.setProgressBarVisibility(false);
             view.setTestButtonEnable(true);
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            view.setProgressBarVisibility(false);
         }
     }
 }

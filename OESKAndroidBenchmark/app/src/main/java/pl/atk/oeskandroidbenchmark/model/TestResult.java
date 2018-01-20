@@ -6,6 +6,7 @@ package pl.atk.oeskandroidbenchmark.model;
 
 public class TestResult {
 
+    private String deviceName;
     private Long fullTime;
     private Long shortTime;
 
@@ -23,5 +24,13 @@ public class TestResult {
 
     public void setShortTime(Long shortTime) {
         this.shortTime = shortTime;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 }
